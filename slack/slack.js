@@ -1,13 +1,17 @@
 const express = require('express'); 
 const app = express();
-
-const http = require('http').createServer(app);
-const cors = require("cors");
-const namespaces = require('../slack/data/namespaces');
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(__dirname + '/public'));
+const http = require('http').createServer(app);
+const cors = require("cors");
+let namespaces = require('./data/namespaces');
+
+
+namespaces.forEach((namespace) => {
+  console.log(namespace);
+})
+
 app.use(cors());
 
 http.listen(8000, () => {
@@ -18,13 +22,6 @@ const io = require('socket.io')(http,{
   cors: {
     origin: '*'
   }
-})
-
-
-namespaces.forEach((namespace) => {
-  io.of(namespace.endpoint).on('connection',(socket) => {
-    console.log(`${socket.id} join ${namespace.endpoint}`);
-  })
 })
 
 
@@ -49,7 +46,7 @@ io.on('connect',(socket) => {
   // io.of('/').to('level1').emit('joined', `${socket.id} have joined the level 1 room!`);
 })
 
-// adminIo.on('connection', (socket) => {
-//   adminIo.emit('messageToAdmin',{data: 'Hello Admin!'})
-//   console.log('어드민 페이지에 접속하셨습니다.')
-// })
+adminIo.on('connection', (socket) => {
+  adminIo.emit('messageToAdmin',{data: 'Hello Admin!'})
+  console.log('어드민 페이지에 접속하셨습니다.')
+})
